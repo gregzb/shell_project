@@ -1,0 +1,15 @@
+[
+    {
+        "arguments": [
+            "cc",
+            "-c",
+            "-ggdb3",
+            "-std=c11",
+            "-o",
+            "obj/eggsh.o",
+            "eggsh.c"
+        ],
+        "directory": "/home/angeredgecko/Documents/Systems/shell_project",
+        "file": "eggsh.c"
+    }
+]
