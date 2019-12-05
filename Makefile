@@ -7,7 +7,7 @@
 
 
 # space-separated list of source files
-SRCS = eggsh.c # Place all
+SRCS = eggsh.c strseper.c parser.c free.c color.c # Place all
 
 # name for executable
 EXE = eggsh
