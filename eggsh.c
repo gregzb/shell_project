@@ -7,9 +7,12 @@
 
 #include <linux/limits.h>
 #include <strings.h>
-#include "header.h"
 
-//enum color {Black, DarkRed, DarkGreen, DarkYellow, DarkBlue, Purple, DarkCyan, LightGrey, DarkGrey, Red, Green, Yellow, Blue, Pink, Cyan, White};
+#include "parser.h"
+#include "color.h"
+#include "free.h"
+
+enum color {Black, DarkRed, DarkGreen, DarkYellow, DarkBlue, Purple, DarkCyan, LightGrey, DarkGrey, Red, Green, Yellow, Blue, Pink, Cyan, White};
 
 int main() {
   set_color(Yellow);
@@ -80,7 +83,7 @@ int main() {
     set_color(White);
     printf("$ ");
 
-    //free_args(args);
+    free_args(args);
   }
 
   return 0;

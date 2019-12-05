@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include "strsep.h"
 
 char ** parse_args( char * line ) {
   size_t str_len = strlen(line)+1;
