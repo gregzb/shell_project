@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 
 char ** parse_args( char * line ) {
   size_t str_len = strlen(line)+1;
   int num_args = 8;
   char ** final = calloc(sizeof(char *), num_args);
-  char * copy = y function you write must have a function header describing the arguments, return value and what the function does.calloc(sizeof(char), str_len);
+  char * copy = calloc(sizeof(char), str_len);
   char * copy_original = copy;
   strncpy(copy, line, str_len);
   char * temp = copy;
