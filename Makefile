@@ -19,7 +19,7 @@ ifeq ($(filter $(DEBUG), false f FALSE F), )
 endif
 
 # flags to pass compiler
-CFLAGS = $(DEBUG_FLAG) -std=c11
+CFLAGS = $(DEBUG_FLAG) -std=gnu11
 
 # compiler to use
 CC = gcc
@@ -68,6 +68,9 @@ run:
 
 autorun: $(EXE)
 	./$(EXE)
+
+memcheck:
+	valgrind --leak-check=yes ./$(EXE)
 
 # OLD MAKEFILE:
 
