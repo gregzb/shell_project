@@ -7,7 +7,7 @@
 
 
 # space-separated list of source files
-SRCS = eggsh.c # Place all
+SRCS = eggsh.c d_string.c parse_lib.c # Place all
 
 # name for executable
 EXE = eggsh
@@ -71,6 +71,12 @@ autorun: $(EXE)
 
 memcheck:
 	valgrind --leak-check=yes ./$(EXE)
+
+memcheck_full:
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(EXE)
+
+test:
+	./$(EXE) < test_file
 
 # OLD MAKEFILE:
 

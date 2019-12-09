@@ -11,5 +11,31 @@
         ],
         "directory": "/home/angeredgecko/Documents/Systems/shell_project",
         "file": "eggsh.c"
+    },
+    {
+        "arguments": [
+            "cc",
+            "-c",
+            "-ggdb3",
+            "-std=gnu11",
+            "-o",
+            "obj/d_string.o",
+            "d_string.c"
+        ],
+        "directory": "/home/angeredgecko/Documents/Systems/shell_project",
+        "file": "d_string.c"
+    },
+    {
+        "arguments": [
+            "cc",
+            "-c",
+            "-ggdb3",
+            "-std=gnu11",
+            "-o",
+            "obj/parse_lib.o",
+            "parse_lib.c"
+        ],
+        "directory": "/home/angeredgecko/Documents/Systems/shell_project",
+        "file": "parse_lib.c"
     }
 ]
