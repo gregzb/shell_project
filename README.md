@@ -51,3 +51,4 @@
 - `void input_loop()`
 - `void sighandler(int signo)`
 - `int main()`
+- `d_string d_string_escape(d_string d_str, char** literal_chars);`
