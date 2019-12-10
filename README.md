@@ -1,6 +1,6 @@
 # shell_project
 
-##Implemented features:
+## Implemented features:
 - basic parsing feature
 - reading and seaparing multiple commands on one line with ";"
 - full redirection using > and <
@@ -14,6 +14,7 @@
 ## To do section:
 - Fix unsuccessful implementations
 - pipes without popen()
+- autcomplete with indent 
 
 ## Bugs:
 - Visual glitches (cannot be fixed without non-canonical mode)
