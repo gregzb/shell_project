@@ -37,4 +37,4 @@ int d_string_resize_arr(d_string *arr, int num_elems, int cnt);
 // use strsep, keep strsepping and converting to d_string
 // free any unncessary stuff
 
-//SHould prob use strtok_r()
+//Should prob use strtok_r()
