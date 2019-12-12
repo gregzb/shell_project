@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <sys/wait.h>
 #include "d_string.h"
+#include "parse.h"
 #include <signal.h>
 
 #include <limits.h>
@@ -114,184 +115,187 @@ void process_args(d_string *args, int num_args, int* redir_info) {
   }
 }
 
-//maybe make redirinfo store strings so it can be replaced with ~ home thing
-int parse_args(d_string d_str, d_string** arr_split_out, int* redir_info) {
-  //printf("INITIAL: %s\n", d_str.content);
-
+int parse_args(d_string d_str, d_string literal_chars, d_string** arr_split_out, d_string** literal_chars_out, int* redir_info) {
   int l;
   for (l = 0; l < 7; l++) {
     redir_info[l] = -1;
   }
 
-  //ESTABLISH PRECEDENCE LMAO
-  char * delimiters[] = {" 2>>", " &>", " 2>", " >>", ">", "<", " "};
-  int delimiter_lengths[] = {4, 3, 3, 3, 1, 1, 1};
-  int num_delims = 7;
+  d_string literal_match = d_string_init(16);
+  // for (l = 0; l < 8; l++) {
+  //   d_string_append_char(&literal_match, '0');
+  // }
+  literal_match.length = 8;
+
+  d_string redirectors[] = {
+    d_string_from_c(" 2>>"),
+    d_string_from_c(" &>"),
+    d_string_from_c(" 2>"),
+    d_string_from_c(">>"),
+    d_string_from_c(">"),
+    d_string_from_c("<"),
+    d_string_from_c(" ")
+  };
+  int num_redirectors = 7;
 
   int num_elems = 8;
   *arr_split_out = malloc(sizeof(d_string) * num_elems);
-  d_string copy = d_string_copy(d_str);
+  *literal_chars_out = malloc(sizeof(d_string) * num_elems);
 
-  d_string space = d_string_from_c(" ");
-  d_string_insert(0, &copy, space);
-  //d_string_append(&copy, space);
-  d_string_free(space);
-
-  //printf("COPY: %s\n", copy.content);
-
-  int found_word = 1;
-
-  int next_word_mode = 6;
-
-  int counter = 0;
-
-  int start = 0;
-  int str_pos;
-  for (str_pos = 0; str_pos < copy.length; str_pos++) {
-
-    char current_char = copy.content[str_pos];
-
+  int next_word_mode = 6, cnt = 0, start = 0, end;
+  for (end = 0; end < d_str.length; end++) {
     int found_delimiter = -1;
 
     int d;
-    for (d = 0; d < num_delims && found_delimiter == -1; d++) {
-      char * delimiter = delimiters[d];
-      int delimiter_length = delimiter_lengths[d];
+    for (d = 0; d < num_redirectors && found_delimiter == -1; d++) {
+      if (end + redirectors[d].length > d_str.length) continue;
 
-      if (str_pos + delimiter_length > copy.length) continue;
-
-      int valid = 1;
-
-      int k;
-      for (k = 0; k < delimiter_length; k++) {
-        if (copy.content[str_pos+k] != delimiter[k]) {
-          valid = 0;
+      if (d_string_match_substr(end, d_str, redirectors[d]) == 1) {
+        d_string literal_shorter = d_string_substr(literal_match, 0, redirectors[d].length);
+        if (d_string_match_substr(end, literal_chars, literal_shorter) == 1 && d_string_free(literal_shorter)) { //should free as well
+          found_delimiter = d;
           break;
         }
       }
-
-      if (valid) {
-        //printf("yerr %d %d\n", str_pos, delimiter_length);
-        found_delimiter = d;
-        found_word = 0;
-        break;
-      }
-      //printf("FINISHED DEL LOOP %d, %d\n", str_pos, d);
     }
 
-    //printf("YEET %d\n", found_delimiter >= 0 || str_pos == copy.length - 1);
+    if (found_delimiter != -1 || end == d_str.length - 1) {
+      if (end == d_str.length-1 && found_delimiter == -1) end++;
+      num_elems = d_string_resize_arr(*arr_split_out, num_elems, cnt);
+      num_elems = d_string_resize_arr(*literal_chars_out, num_elems, cnt);
 
-    if (found_delimiter >= 0 || str_pos == copy.length - 1) {
-      //fprintf(stderr, "FOUND DELIM AT: %d %d %d %d %s\n", str_pos, found_delimiter, copy.capacity, copy.length, copy.content);
-      if (counter >= num_elems) {
-        num_elems *= 2;
-        *arr_split_out = realloc(*arr_split_out, sizeof(d_string) * num_elems);
+      if (end - start > 0) {
+        d_string temp = d_string_substr(d_str, start, end);
+        switch(next_word_mode) {
+          case 6:
+          (*literal_chars_out)[cnt] = d_string_substr(literal_chars, start, end);
+          (*arr_split_out)[cnt++] = d_string_substr(d_str, start, end);
+          break;
+          case 5:
+          redir_info[next_word_mode] = open(temp.content, O_RDONLY);
+          break;
+          case 2:
+          case 4:
+          redir_info[next_word_mode] = open(temp.content, O_WRONLY | O_TRUNC | O_CREAT, 0644);
+          break;
+          case 0:
+          case 3:
+          redir_info[next_word_mode] = open(temp.content, O_WRONLY | O_APPEND | O_CREAT, 0644);
+          break;
+          case 1:
+          redir_info[next_word_mode] = open(temp.content, O_WRONLY | O_TRUNC | O_CREAT, 0644);
+          //redir_info[next_word_mode] = -2;
+          break;
+        }
+        d_string_free(temp);
       }
 
-      if (found_delimiter >= 0) {
-        int delimiter_length = delimiter_lengths[found_delimiter];
-        int k;
-        //fprintf(stderr, "CHONK1\n");
-        for (k = 0; k < delimiter_length; k++) {
-          copy.content[str_pos + k] = 0;
-        }
-      }
-      //fprintf(stderr, "CHONK2\n");
-      if (str_pos - start > 0 || str_pos == copy.length - 1) {
-        //printf("%d\n", next_word_mode);
-        if (next_word_mode == 6) {
-          found_word = 1;
-          //fprintf(stderr, "CHONK3\n");
-          //printf("START: %d DELIM: %d\n", start, found_delimiter);
-          //printf("%s\n", copy.content+start);
-          //d_string fuck = d_string_from_c(copy.content + start);
-          //fprintf(stderr, "CHONK3.2\n");
-          //d_string_print(fuck);
-          //fprintf(stderr, "CHONK3.5\n");
-            (*arr_split_out)[counter++] = d_string_from_c(copy.content + start);
-          //fprintf(stderr, "CHONK4\n");
-        } else {
-          //fprintf(stderr, "CHONK5\n");
-          if (next_word_mode == 5) {
-            redir_info[next_word_mode] = open(copy.content + start, O_RDONLY);
-          } else if (next_word_mode == 2 || next_word_mode == 4){
-            redir_info[next_word_mode] = open(copy.content + start, O_WRONLY | O_TRUNC | O_CREAT, 0644);
-          } else if (next_word_mode == 0 || next_word_mode == 3){
-            redir_info[next_word_mode] = open(copy.content + start, O_WRONLY | O_APPEND | O_CREAT, 0644);
-          } else if (next_word_mode == 1){
-            redir_info[next_word_mode] = -2;
-          }
-          //fprintf(stderr, "CHONK6\n");
-        }
-      }
-        //fprintf(stderr, "CHONK7\n");
       next_word_mode = found_delimiter < next_word_mode ? found_delimiter : next_word_mode;
-      str_pos += 0; //str pos will get incremented
-
-      start = str_pos + 1;
+      end += redirectors[found_delimiter].length - 1;
+      start = end + 1;
     }
-
   }
 
-  d_string_free(copy);
-  return counter;
+  int d;
+  for (d = 0; d < num_redirectors; d++) {
+    d_string_free(redirectors[d]);
+  }
+  d_string_free(literal_match);
+
+  return cnt;
+}
+
+void process_input(d_string user_input, d_string literal_chars) {
+  d_string *semi_split;
+  d_string *semi_split_literals;
+  int split_sides = d_string_safe_split(user_input, literal_chars, ';', &semi_split, &semi_split_literals);
+
+  int prev_read = -1;
+
+  int i;
+  for (i = 0; i < split_sides; i++) {
+    d_string *pipe_split;
+    d_string *pipe_split_literals;
+    int pipe_sides = d_string_safe_split(semi_split[i], semi_split_literals[i], '|', &pipe_split, &pipe_split_literals);
+
+    int temp_pipe[2];
+    pipe(temp_pipe);
+
+    int k;
+    for (k = 0; k < pipe_sides; k++) {
+      int fds[7];
+
+      d_string *args;
+      d_string *args_literals;
+
+      int num_args = parse_args(pipe_split[k], pipe_split_literals[k], &args, &args_literals, fds);
+      int j;
+      for (j = 0; j < num_args; j++) {
+        //its not separating, parse args broken
+        if (args[j].content[0] == '~' && args_literals[j].content[0] == 0) {
+          d_string tilde = d_string_from_c("~");
+          d_string home_env = d_string_from_c(getenv("HOME"));
+
+          d_string_replace(&args[j], tilde, home_env);
+
+          d_string_free(tilde);
+          d_string_free(home_env);
+        }
+      }
+      if (num_args > 0) {
+        process_args(args, num_args, fds);
+      }
+
+      d_string_free_arr(args, num_args);
+      d_string_free_arr(args_literals, num_args);
+    }
+
+    d_string_free_arr(pipe_split, pipe_sides);
+    d_string_free_arr(pipe_split_literals, pipe_sides);
+
+    //close prev
+    //set prev to the current
+  }
+
+  //finish up pipe handling here
+
+  d_string_free_arr(semi_split, split_sides);
+  d_string_free_arr(semi_split_literals, split_sides);
 }
 
 void input_loop() {
-  char user_input[8192];
-  while (fgets(user_input, 8192, stdin) != NULL) {
-    int str_len = strlen(user_input);
-    user_input[str_len-1] = 0;
-    d_string input = d_string_from_c(user_input);
+  d_string d_user_input = d_string_init(32);
+  d_string total_literal_chars = d_string_init(32);
+  char user_input[256];
+  int default_val = 0;
+  while (fgets(user_input, 256, stdin) != NULL) {
+    d_string temp = d_string_from_c(user_input);
+    d_string literal_chars;
+    d_string escaped = d_string_escape(temp, &literal_chars, default_val);
 
-    d_string *semi_split;
-    int split_sides = d_string_split(input, ";", &semi_split);
+    d_string_append(&d_user_input, escaped);
+    d_string_append(&total_literal_chars, literal_chars);
 
-    d_string_free(input);
+    d_string_free(escaped);
+    d_string_free(literal_chars);
 
-    int i;
-    for (i = 0; i < split_sides; i++) {
-      d_string semi = semi_split[i];
+    char last_char = d_user_input.content[d_user_input.length-1];
 
-      d_string *pipe_split;
-      int pipe_sides = d_string_split(semi, "|", &pipe_split);
+    //printf("%d, %d, %d\n", count_quotes(d_user_input, total_literal_chars), last_char, total_literal_chars.content[d_user_input.length-1]);
+    if (count_quotes(d_user_input, total_literal_chars) % 2 == 0 && (last_char == '\n' && total_literal_chars.content[d_user_input.length-1] == 0)) {
+      d_string_delete(&d_user_input, d_user_input.length-1, d_user_input.length);
+      d_string_delete(&total_literal_chars, total_literal_chars.length-1, total_literal_chars.length);
+      process_input(d_user_input, total_literal_chars);
 
-      int k;
-      for (k = 0; k < pipe_sides; k++) {
-        d_string pipe_side = pipe_split[k];
-
-        d_string *args;
-        //int num_args = d_string_split(pipe_side, " ", &args);
-        int fds[7];
-        int num_args = parse_args(pipe_side, &args, fds);
-        //printf("%d args\n", num_args);
-        //printf("FINISHED PARSE\n");
-
-        int j;
-        for (j = 0; j < num_args; j++) {
-          if (args[j].content[0] == '~') {
-            d_string tilde = d_string_from_c("~");
-            d_string home_env = d_string_from_c(getenv("HOME"));
-
-            d_string_replace(&args[j], tilde, home_env);
-
-            d_string_free(tilde);
-            d_string_free(home_env);
-          }
-          //printf("%s\n", args[j].content);
+      d_string_free(d_user_input);
+      d_string_free(total_literal_chars);
+      d_user_input = d_string_init(32);
+      total_literal_chars = d_string_init(32);
+      if (isatty(STDIN_FILENO)) {
+          print_user_info();
         }
-
-        process_args(args, num_args, fds);
-        d_string_free_arr(args, num_args);
-      }
-
-      d_string_free_arr(pipe_split, pipe_sides);
-    }
-
-    d_string_free_arr(semi_split, split_sides);
-
-    if (isatty(STDIN_FILENO)) {
-      print_user_info();
+    } else if (total_literal_chars.content[d_user_input.length-1] != 0){
+      default_val = total_literal_chars.content[d_user_input.length-1] >> 1;
     }
   }
 }
