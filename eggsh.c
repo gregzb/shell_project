@@ -64,15 +64,27 @@ void process_args(d_string *args, int num_args, int* redir_info) {
       d_string_free_arr(args, num_args);
       exit(0);
     } else if (strcasecmp(args[0].content, "cd") == 0) {
-      if (num_args >= 2) {
-        int result = chdir(args[1].content);
-        if (result != 0) {
-          printf("%s\n", strerror(errno));
+        if (num_args >= 2) {
+          int result = chdir(args[1].content);
+          if (result != 0) {
+            int err_backup = dup(STDERR_FILENO);
+            int i;
+            for (i = 0; i < 7; i++) {
+              int fd = redir_info[i];
+              if (fd != -1) {
+                if (i == 0 || i == 2 || i == 1) {
+                  dup2(fd, STDERR_FILENO); // make this more flexible
+                  close(fd);
+                }
+              }
+            }
+            fprintf(stderr, "%s\n", strerror(errno));
+            dup2(err_backup, STDERR_FILENO);
+          } else {
+            chdir(getenv("HOME"));
+          //take me home pls
+          }
         }
-      } else {
-        chdir(getenv("HOME"));
-        //take me home pls
-      }
     } else {
       int result = fork();
       if (result) {
@@ -85,26 +97,37 @@ void process_args(d_string *args, int num_args, int* redir_info) {
           int fd = redir_info[i];
           //printf("fd %i %d\n", i, fd);
           if (fd != -1) {
+            // if (i == 5) {
+            //   dup2(fd, STDIN_FILENO);
+            //   //redir_info[next_word_mode] = open(copy.content + start, O_RDONLY);
+            // } else if (i == 2 || i == 4){
+            //   dup2(fd, STDOUT_FILENO);
+            //   //redir_info[next_word_mode] = open(copy.content + start, O_WRONLY | O_TRUNC | O_CREAT, 0644);
+            // } else if (i == 0 || i == 3){
+            //   dup2(fd, STDOUT_FILENO);
+            //   //redir_info[next_word_mode] = open(copy.content + start, O_WRONLY | O_APPEND | O_CREAT, 0644);
+            // } else if (i == 1){
+            //   dup2(STDOUT_FILENO, STDERR_FILENO);
+            //   //redir_info[next_word_mode] = -2;
+            // }
             if (i == 5) {
               dup2(fd, STDIN_FILENO);
-              //redir_info[next_word_mode] = open(copy.content + start, O_RDONLY);
-            } else if (i == 2 || i == 4){
+            } else if (i == 0 || i == 2) {
+              dup2(fd, STDERR_FILENO);
+            } else if (i == 3 || i == 4) {
               dup2(fd, STDOUT_FILENO);
-              //redir_info[next_word_mode] = open(copy.content + start, O_WRONLY | O_TRUNC | O_CREAT, 0644);
-            } else if (i == 0 || i == 3){
+            } else if (i == 1) {
+              dup2(fd, STDERR_FILENO);
               dup2(fd, STDOUT_FILENO);
-              //redir_info[next_word_mode] = open(copy.content + start, O_WRONLY | O_APPEND | O_CREAT, 0644);
-            } else if (i == 1){
-              dup2(STDOUT_FILENO, STDERR_FILENO);
-              //redir_info[next_word_mode] = -2;
             }
+            close(fd);
           }
         }
 
         char ** c_arr = d_string_arr_to_c(args, num_args);
         int result = execvp(c_arr[0], c_arr);
         if (result != 0) {
-          printf("%s\n", strerror(errno));
+          fprintf(stderr, "%s\n", strerror(errno));
         }
         //some cleanup for if execvp fails bc why not
         free(c_arr);
