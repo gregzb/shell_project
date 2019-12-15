@@ -15,7 +15,6 @@ d_string d_string_init(int length) {
   return temp;
 }
 
-//resizes capacity
 void d_string_resize(d_string * d_str, int new_capacity) {
   d_str->content = realloc(d_str->content, sizeof(char) * new_capacity + 1);
   int k;
@@ -130,6 +129,14 @@ int d_string_match_substr(int idx, d_string d_str, d_string c) {
   return 1;
 }
 
+int d_string_replace(d_string *d_str, d_string to_replace, d_string new) {
+  int substr = d_string_find_substr(*d_str, to_replace);
+  if (substr < 0) return -1;
+  d_string_delete(d_str, substr, substr + to_replace.length);
+  d_string_insert(substr, d_str, new);
+  return substr;
+}
+
 void d_string_delete(d_string *d_str, int start, int end) {
   if (start < 0 || start >= d_str->length || end < 0 || end >= d_str->length + 1 || end <= start) {
     return;
@@ -191,14 +198,6 @@ char ** d_string_arr_to_c(d_string *arr, int num_elems) {
   return temp;
 }
 
-int d_string_replace(d_string *d_str, d_string to_replace, d_string new) {
-  int substr = d_string_find_substr(*d_str, to_replace);
-  if (substr < 0) return -1;
-  d_string_delete(d_str, substr, substr + to_replace.length);
-  d_string_insert(substr, d_str, new);
-  return substr;
-}
-
 void d_string_print(d_string d_str) {
   //assumes byte at index length is null
   printf("d_string: (%d, %d) %s", d_str.length, d_str.capacity, d_str.content);
@@ -209,14 +208,6 @@ char d_string_free(d_string d_str) {
   return 1;
 }
 
-int d_string_resize_arr(d_string *arr, int num_elems, int cnt) {
-  if (cnt == num_elems - 1) {
-    num_elems *= 2;
-    arr = realloc(arr, sizeof(d_string) * num_elems);
-  }
-  return num_elems;
-}
-
 char d_string_free_arr(d_string *arr, int num_elems) {
   int i;
   for (i = 0; i < num_elems; i++) {
@@ -224,4 +215,12 @@ char d_string_free_arr(d_string *arr, int num_elems) {
   }
   free(arr);
   return 1;
+}
+
+int d_string_resize_arr(d_string *arr, int num_elems, int cnt) {
+  if (cnt == num_elems - 1) {
+    num_elems *= 2;
+    arr = realloc(arr, sizeof(d_string) * num_elems);
+  }
+  return num_elems;
 }

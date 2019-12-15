@@ -12,6 +12,11 @@
 #include "parse.h"
 #include "filestream_handling.h"
 
+/*
+args, num_args, redir_info, pipe -> array of args, length of array, what/where to redirect, pipe read/write ends
+returns -> void
+Runs the command present in the args array while performing redirection and applying setup for piping
+*/
 void process_args(d_string *args, int num_args, int* redir_info, int* pipe) {
   if (num_args >= 1) {
     if (strcmp(args[0].content, "exit") == 0) {
@@ -61,6 +66,11 @@ void process_args(d_string *args, int num_args, int* redir_info, int* pipe) {
   }
 }
 
+/*
+user_input, literal_chars -> A full user input, literal chars of user input
+returns -> void
+Separates the user input by ;, then by |, then parses, then passes to execute function, then frees stuff
+*/
 void process_input(d_string user_input, d_string literal_chars) {
   d_string *semi_split;
   d_string *semi_split_literals;
@@ -77,8 +87,6 @@ void process_input(d_string user_input, d_string literal_chars) {
     d_string *pipe_split_literals;
     int pipe_sides = d_string_safe_split(semi_split[i], semi_split_literals[i], '|', &pipe_split, &pipe_split_literals);
 
-    //fprintf(stderr, "PIPES: %d\n", pipe_sides);
-
     int k;
     for (k = 0; k < pipe_sides; k++) {
 
@@ -93,6 +101,7 @@ void process_input(d_string user_input, d_string literal_chars) {
       d_string *args_literals;
 
       int num_args = parse_args(pipe_split[k], pipe_split_literals[k], &args, &args_literals, fds);
+
       int j;
       for (j = 0; j < num_args; j++) {
         //its not separating, parse args broken
@@ -124,6 +133,10 @@ void process_input(d_string user_input, d_string literal_chars) {
   d_string_free_arr(semi_split_literals, split_sides);
 }
 
+/*
+returns -> void
+Continually asks user for input, calls escape, allows for arbirary length input
+*/
 void input_loop() {
   d_string d_user_input = d_string_init(32);
   d_string total_literal_chars = d_string_init(32);
@@ -142,7 +155,6 @@ void input_loop() {
 
     char last_char = d_user_input.content[d_user_input.length-1];
 
-    //printf("%d, %d, %d\n", count_quotes(d_user_input, total_literal_chars), last_char, total_literal_chars.content[d_user_input.length-1]);
     if (count_quotes(d_user_input, total_literal_chars) % 2 == 0 && (last_char == '\n' && total_literal_chars.content[d_user_input.length-1] == 0)) {
       d_string_delete(&d_user_input, d_user_input.length-1, d_user_input.length);
       d_string_delete(&total_literal_chars, total_literal_chars.length-1, total_literal_chars.length);
@@ -166,7 +178,7 @@ void sighandler(int signo) {
 }
 
 int main() {
-  signal(SIGINT, sighandler); // include this in final
+  signal(SIGINT, sighandler);
 
   greeting();
   if (isatty(STDIN_FILENO)) {

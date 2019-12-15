@@ -133,6 +133,7 @@ int parse_args(d_string d_str, d_string literal_chars, d_string** arr_split_out,
           redir_info[next_word_mode] = open_redirection_file(temp, next_word_mode);
           if (redir_info[next_word_mode] < 0) {
             print_error(strerror(errno));
+            error_found = 1;
           }
         }
         d_string_free(temp);
