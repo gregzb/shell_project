@@ -7,7 +7,7 @@
 
 
 # space-separated list of source files
-SRCS = eggsh.c d_string.c parse.c # Place all
+SRCS = eggsh.c d_string.c parse.c print_utils.c filestream_handling.c # Place all
 
 # name for executable
 EXE = eggsh

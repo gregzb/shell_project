@@ -1,32 +1,21 @@
-echo Welcome to the EGG Shell test file!
-echo -~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-echo Making tests directory if necessary...
-mkdir -p tests
-echo -~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-echo Cd-ing into tests directory...
-cd tests
-echo -~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-echo Making a few example files...
-touch examplefile1
-touch examplefile2
-echo -~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-echo Testing a command
+echo NORMAL TEST
 ls
-echo -~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-echo Running a command + argument
-ls -l
-echo -~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-echo Testing semicolon separation
-ls -l; echo doot doot
-echo -~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-echo Testing redirect out
-ls -al > test1
-echo -~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-echo Testing redirect out and in
-cat < test1 > test2
-cat test2
-echo new text > test1
-echo -~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-echo Combining everything together
-echo other doot ; wc < test2; cat test1; cd ..
+ls -a -l
+echo CD TEST
+cd ..
+pwd
+echo SEMICOLON TEST
+ps ; echo HELLO
+echo STDOUT REDIRECT TEST
+w > wholist
+cat wholist
+echo STDIN REDIRECT TEST
+tr a-z A-Z < wholist
+echo DOUBLE REDIRECT TEST
+tr a-z A-Z < wholist > foo
+cat foo
+echo PIPE TEST
+ls | wc
+rm wholist foo
+echo EXIT
 exit
