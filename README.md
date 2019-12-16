@@ -32,7 +32,7 @@ by Greg Zborovsky and Emma Choi
   - In general, feeding input that would be invalid in bash
 
 ## Files and Function headers:
-string.c
+d_string.c
 - `d_string d_string_init();`
   - input: int length
   - returns: a new d_string
