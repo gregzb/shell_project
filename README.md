@@ -1,4 +1,5 @@
 # shell_project
+by Greg Zborovsky and Emma Choi
 
 ## Implemented features:
 - basic parsing feature
@@ -6,10 +7,13 @@
 - full redirection using > and <
 - color and use of username
 - infinite length input allowed
+- 
 
 ## Attempted but Unsuccessful Implementations:
 - Quotes
 - Escapes
+- tab autocompletion using readline()
+- tab autocompletion using raw mode
 
 ## To do section:
 - Fix unsuccessful implementations
@@ -17,11 +21,11 @@
 - autcomplete with indent 
 
 ## Bugs:
-- Visual glitches (cannot be fixed without non-canonical mode)
+- Visual glitches (cannot be fixed without non-canonical mode
 
 ## Additional Information:
 
-## Function headers:
+## Files and Function headers:
 - For strings:
   - `d_string d_string_init(int length);`
   - `void d_string_resize(d_string * d_str, int new_length);`
