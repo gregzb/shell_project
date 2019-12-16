@@ -7,7 +7,7 @@ by Greg Zborovsky and Emma Choi
 - arbitrary length input
 - reading and separating multiple commands on one line with ";"
 - multiple, any order redirection supporting >, <, >>, 2>, 2>>, &>
-- infinite piping
+- "infinite" piping using pipe()
 - support of quotations
 - support for character escaping
 - support for accidental spaces
@@ -21,6 +21,7 @@ by Greg Zborovsky and Emma Choi
 ## To do section:
 - Fix unsuccessful implementations
 - autcomplete with tab
+- command history with up and down keys
 
 ## Bugs:
 - Visual glitches (cannot be fixed without non-canonical mode)
