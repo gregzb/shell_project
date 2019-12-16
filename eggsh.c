@@ -150,6 +150,7 @@ void input_loop() {
     d_string_append(&d_user_input, escaped);
     d_string_append(&total_literal_chars, literal_chars);
 
+    d_string_free(temp);
     d_string_free(escaped);
     d_string_free(literal_chars);
 
