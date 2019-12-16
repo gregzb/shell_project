@@ -203,7 +203,7 @@ print_utils.c
   - input: none
   - returns: void
   - prints introduction to eggsh
-- `void print_error(char* error);
+- `void print_error(char * error);`
   - input: char * error -> string to print to stderr
   - returns: void
   - sets color to red and prints to stderr
