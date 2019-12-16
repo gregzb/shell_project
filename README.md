@@ -20,11 +20,10 @@ by Greg Zborovsky and Emma Choi
 
 ## To do section:
 - Fix unsuccessful implementations
-- pipes without popen()
-- autcomplete with indent 
+- autcomplete with tab
 
 ## Bugs:
-- Visual glitches (cannot be fixed without non-canonical mode
+- Visual glitches (cannot be fixed without non-canonical mode)
 
 ## Additional Information:
 
