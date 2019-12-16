@@ -23,10 +23,13 @@ by Greg Zborovsky and Emma Choi
 - autcomplete with tab
 - command history with up and down keys
 
-## Bugs:
+## Known Bugs:
 - Visual glitches (cannot be fixed without non-canonical mode)
 
 ## Additional Information:
+- Undefined behavior:
+  - Multiple redirect operators which redirect conflicting streams
+  - In general, feeding input that would be invalid in bash
 
 ## Files and Function headers:
 string.c
