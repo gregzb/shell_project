@@ -61,7 +61,7 @@ string.c
   d_string d_src -> d_src is the string to insert
   - returns: void
   - Inserts d_src into d_dest at end of d_dest
--  `void d_string_append_char();`
+- `void d_string_append_char();`
   - input: d_string * d_dest -> d_dest to add to
   char c -> d_src is the character to insert
   - returns: void
@@ -117,7 +117,7 @@ string.c
   d_string ** arr_split_out -> where to store the split results
   - returns: int number of args in arr_split_out
   - d_str is not modified, arr_split_out is an array of d_strings that is malloc'ed and will contain all of the separated d_strings
--  `char ** d_string_arr_to_c();`
+- `char ** d_string_arr_to_c();`
   - input: d_string arr -> arr of d_strings
   int num_elems -> num of d_strings in arr
   - returns: an array of c-style string
