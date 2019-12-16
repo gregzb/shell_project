@@ -71,7 +71,7 @@ string.c
   char c -> character to find
   - returns: int index of where c was found, or -1 if not
   - Finds the first index of char c in d_str
--  `int d_string_count();`
+- `int d_string_count();`
   - input: d_string d_str ->  d_str to search through,
   char c -> c is character to count
   - returns int number of times that c appears in d_str
@@ -87,7 +87,7 @@ string.c
   d_string c -> c is string to find
   - returns -> int 1 if found, -1 if not
   - returns 1 if at index idx of d_str string c can be found, otherwise -1
-- `int d_string_replace();
+- `int d_string_replace();`
   - input: d_string d_str -> being operated on
   d_string to_replace -> the string to replace
   d_string new -> is the string to insert
